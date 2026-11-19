@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Superbug Are You?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+
+<script>
+/* =====================================================================
+   QUIZ CONTENT — EDIT EVERYTHING IN THIS BLOCK
+   ---------------------------------------------------------------------
+   • BUGS: the seven results. The key (e.g. "ecoli") is what answers
+     point to. "color" is the result colony color.
+   • QUESTIONS: each option lists the bug keys it gives 1 point to.
+     Optional per option:
+       emoji:  "🍷"            shown on picture-style questions
+       image:  "img/wine.jpg"  a real picture (overrides emoji)
+       swatch: "#E8B931"       a color chip (for the color question)
+       note:   "..."           your rationale — NEVER shown to players
+     layout: "grid" = picture tiles, "list" = text buttons.
+   • tiebreak: a one-line vibe (don't name the bug) — only shown when
+     the player ties between bugs; they pick from the tied bugs' lines.
+   • To add/remove a question or option, copy/delete a { ... } block
+     (watch the commas between blocks).
+   ===================================================================== */
+const QUIZ = {
+  title: "Which Stealthy Superbug Are You?",
+  subtitle: "Ten questions. Seven drug-resistant bacteria.",
+  blurb: "They’re sneaky, adaptable, and very hard to get rid of. The ESKAPEE pathogens are seven bacteria that have learned to “escape” antibiotics, and our lab studies how that resistance moves through our environment. Which one shares your survival strategy? Take the quiz to find out!",
+  credit: "Made by the Karthikeyan Lab · Caltech",
+  creditLink: "", // e.g. "https://your-lab-site.edu" — leave "" for plain text
+  tiebreakPrompt: "It's a tie! Which one sounds the most like you?",
+
+  BUGS: {
+    efaec: {
+      name: "Enterococcus faecium", short: "E. faecium",
+      art: "img/bugs/efaec.png",
+      tiebreak: "Hope for the best, prep for the apocalypse.",
+      archetype: "The Bathroom Bandit", color: "#2B2B30",
+      vibes: ["Unflappable", "Outlasts chaos", "Underdog"],
+      personality: "Calm, unflappable, and prepared for literally anything: heat, salt, bile, the apocalypse. You always assume the worst and plan accordingly, but your bunker has extra supplies, and you share them with your friends. People often assume you're the harmless quiet one (you show up in cheese and probiotics, after all), but you've got a dark sense of humor and a penchant for danger. You're quiet and low-key day to day, but when disaster wipes out everyone else, you're the one walking out of the wreckage with your whole crew.",
+      toxic: "Antibiotics clear out the competition, and you move right in."
+    },
+    saureus: {
+      name: "Staphylococcus aureus", short: "S. aureus",
+      art: "img/bugs/saureus.png",
+      tiebreak: "Sweet on the outside, ruthless when it counts.",
+      archetype: "Fool's Gold Foe", color: "#D9A520",
+      vibes: ["Charming", "Deceptively harmless", "Friendly"],
+      personality: "The Queen Bee: golden, charming, and effortlessly popular. A third of people are already carrying you around. You run in a tight clique and outsiders are not welcome. On the surface you're sweet, but the moment someone's guard is down you strike, and you don't fight fair.",
+      toxic: "You go straight for the bloodstream – metaphorically and literally."
+    },
+    kpneu: {
+      name: "Klebsiella pneumoniae", short: "K. pneumoniae",
+      art: "img/bugs/kpneu.png",
+      tiebreak: "I know everyone, and everyone's business.",
+      archetype: "The Lung Lurker", color: "#E0679A",
+      vibes: ["Connector", "Loyal", "Social", "Suspicious"],
+      personality: "You're friends with everyone and know everyone's business. You're the connector who introduces people and passes along everything you hear. Your loyalty is unmatched: once you're in someone's life, you're in, and you're not easy to shake off! You hold onto everything – inside jokes, old screenshots, other people's secrets – and you never show up anywhere alone.",
+      toxic: "Named a carbapenemase after yourself (KPC), then gave it to everyone you know."
+    },
+    abaum: {
+      name: "Acinetobacter baumannii", short: "A. baumannii",
+      art: "img/bugs/abaum.png",
+      tiebreak: "I'll outlast you. Not out of passion. Out of spite.",
+      archetype: "The Sandy Scoundrel", color: "#B59E78",
+      vibes: ["Stoic", "Patient", "Low maintenance", "Resilient"],
+      personality: "Stubborn, hard-headed, and impossible to talk out of anything. You're the friend who's there at someone's best and their absolute worst, the last to leave the party, and still on the couch the next morning. You keep to yourself, and most of your social life comes secondhand through your one extrovert best friend: their parties, their inside jokes, their acquaintances. Why build your own network when you can borrow theirs?",
+      toxic: "Survives months on a dry bed rail out of pure spite."
+    },
+    paer: {
+      name: "Pseudomonas aeruginosa", short: "P. aeruginosa",
+      art: "img/bugs/paer.png",
+      tiebreak: "If I don't organize it, it's not happening.",
+      archetype: "The Blue Biofilm Builder", color: "#169C97",
+      vibes: ["Creative", "Social strategist", "Planner"],
+      personality: "Creative, strategic, and annoyingly self-sufficient. You can make yourself at home anywhere, from a hot tub to a houseplant. You keep the friend group organized: coordinating hangouts and making sure everyone is included. You love a big build, have an artsy streak (blue-green is your color), and your taste is impeccable: a nice glass of wine and a long soak in the jacuzzi. You have hidden depths that only show under the right light, and when life hits hard, you take it as a chance to reinvent yourself and come back tougher.",
+      toxic: "Your guard was up before anyone even brought antibiotics."
+    },
+    ecoli: {
+      name: "Escherichia coli", short: "E. coli",
+      art: "img/bugs/ecoli.png",
+      tiebreak: "I'm the main character, and I've made peace with it.",
+      archetype: "The Gutfather", color: "#3E9B4F",
+      vibes: ["Famous", "Social", "Popular"],
+      personality: "You're the main character. Everyone knows your name, for better and worse. You're the life of every party, the friend everyone's parents love, and the one who overshares. Scientists have been obsessed with you for over a century, and honestly, you've earned it. You get along with almost everyone, but stay in the wrong place too long and you'll cause a scene.",
+      toxic: "You never say no to a hostile gene exchange, and you're literally the reason scientists discovered bacteria have sex (conjugation, 1946)."
+    },
+    enterobacter: {
+      name: "Enterobacter", short: "Enterobacter",
+      art: "img/bugs/enterobacter.png",
+      tiebreak: "Plans are optional. Adventure isn't.",
+      archetype: "The Motile Misfit", color: "#B5459B",
+      vibes: ["Unpredictable", "Hard to pin down", "Up for anything"],
+      personality: "You contain multitudes, and taxonomists are still arguing about which ones. You're adventurous (garden? hospital? outer space? why not!), easygoing, and usually up for anything. You'll happily listen to the gossip and go along with the plan, right up until someone crosses a line you care about. Then you switch sides fast, and won't hesitate to call someone out.",
+      // DRAFT — replace with your own
+      toxic: "You pass the vibe check at first glance, then go villain mode mid-infection"
+    }
+  },
+
+  QUESTIONS: [
+    {
+      prompt: "Pick a vacation spot!", layout: "grid",
+      options: [
+        { text: "A hot spring in the mountains", emoji: "♨️", image: "img/Q1/hot-spring.jpg", bugs: ["paer"], note: "hot tub reasons" },
+        { text: "Riding camels through the Sahara", emoji: "🐪", image: "img/Q1/desert.jpg", bugs: ["abaum"], note: "desert vibes / sandy scoundrel" },
+        { text: "A warm beach", emoji: "🏖️", image: "img/Q1/beach.jpg", bugs: ["ecoli", "efaec"], note: "the two beach-monitoring indicator bacteria" },
+        { text: "A relaxing spa", emoji: "💆", image: "img/Q1/spa.jpg", bugs: ["saureus", "paer"], note: "skin/glow-up; hot tubs" },
+        { text: "An off-the-grid cabin, fully stocked", emoji: "🛖", image: "img/Q1/cabin.jpg", bugs: ["abaum", "efaec"], note: "isolated; survivalist" },
+        { text: "Outer space", emoji: "🚀", image: "img/Q1/outerspace.jpg", bugs: ["ecoli", "enterobacter"], note: "E. coli cultured in space; Enterobacter found on the ISS" },
+        { text: "A music festival", emoji: "🎪", image: "img/Q1/concert.jpg", bugs: ["kpneu"], note: "crowds, lots of interacting = HGT" },
+        { text: "A big group trip with everyone you know", emoji: "🧳", image: "img/Q1/friends.jpg", bugs: ["kpneu", "enterobacter"], note: "social / adventurous" },
+        { text: "A VIP weekend in Vegas", emoji: "🎰", image: "img/Q1/vegas.jpg", bugs: ["saureus"], note: "glitz, glam, opportunism" }
+      ]
+    },
+    {
+      prompt: "Choose a weirdly specific superpower:", layout: "list",
+      options: [
+        { text: "Everything you touch turns to gold", bugs: ["saureus"], note: "aureus = gold" },
+        { text: "You glow in the dark", bugs: ["paer"], note: "fluoresces under UV" },
+        { text: "You can shapeshift, but only into inanimate objects", bugs: ["abaum", "enterobacter"], note: "shapeshifter; non-motile" },
+        { text: "You can read people's minds, but only while touching them", bugs: ["ecoli", "kpneu", "enterobacter"], note: "conjugation" },
+        { text: "You can eat anything (ghost peppers, expired leftovers, a whole salt shaker) with zero consequences", bugs: ["efaec"], note: "heat/salt/bile tolerant" },
+        { text: "You can turn invisible, but you're fully coated in slime", bugs: ["kpneu", "paer"], note: "capsule; biofilm" }
+      ]
+    },
+    {
+      prompt: "What's your energy in the group chat?", layout: "list",
+      options: [
+        { text: "The organizer, always trying to schedule a meetup", bugs: ["paer"], note: "biofilm builder" },
+        { text: "The one with all the tea", bugs: ["kpneu"], note: "shares info and genes" },
+        { text: "The one who dramatically leaves the chat, then gets added back a week later", bugs: ["enterobacter"], note: "" },
+        { text: "The one who screenshots everything, just in case", bugs: ["efaec"], note: "prepper" },
+        { text: "The one with a secret side chat about the main chat", bugs: ["saureus"], note: "cliquey; HGT within genus" },
+        { text: "The one who only responds with memes", bugs: ["ecoli"], note: "memes spread like plasmids" },
+        { text: "The lurker who never responds", bugs: ["abaum"], note: "scavenger: absorbs, doesn't contribute" }
+      ]
+    },
+    {
+      prompt: "Pick your favorite color:", layout: "grid",
+      options: [
+        { text: "Yellow / Gold", swatch: "#E8B931", bugs: ["saureus"], note: "golden colonies" },
+        { text: "Teal", swatch: "#1A9E9A", bugs: ["paer"], note: "pyocyanin" },
+        { text: "Metallic green", swatch: "linear-gradient(135deg,#1f6b3a,#62c27a 45%,#c9f0b5 55%,#2f8a4a)", bugs: ["ecoli"], note: "green sheen on EMB" },
+        { text: "Beige / Neutrals", swatch: "#E3D5BC", bugs: ["abaum"], note: "cream colonies" },
+        { text: "Pink", swatch: "#EE86AE", bugs: ["kpneu", "enterobacter"], note: "pink on MacConkey" },
+        { text: "Black", swatch: "#1d1d1f", bugs: ["efaec"], note: "blackens bile-esculin agar" }
+      ]
+    },
+    {
+      prompt: "How do you make new friends?", layout: "list",
+      options: [
+        { text: "I don't really try. I just make friends everywhere I go.", bugs: ["ecoli", "kpneu"], note: "promiscuous HGT" },
+        { text: "I join a club or sport", bugs: ["paer"], note: "quorum sensing" },
+        { text: "My best friend's friends become my friends", bugs: ["abaum"], note: "scavenger" },
+        { text: "I don't. My circle is complete.", bugs: ["saureus"], note: "HGT mostly within genus" },
+        { text: "I just be myself until someone responds with the same energy", bugs: ["efaec"], note: "" },
+        { text: "I'm always traveling somewhere new, so I meet people everywhere", bugs: ["enterobacter"], note: "ubiquitous" }
+      ]
+    },
+    {
+      prompt: "Pick a drink order!", layout: "grid",
+      options: [
+        { text: "Wine", emoji: "🍷", image: "img/Q6/wine.jpg", bugs: ["paer"], note: "grapes" },
+        { text: "Champagne", emoji: "🥂", image: "img/Q6/bubbly.jpg", bugs: ["saureus"], note: "gold sparkle" },
+        { text: "Margarita, extra salt on the rim", emoji: "🍹", image: "img/Q6/margarita.jpg", bugs: ["efaec"], note: "salt tolerant" },
+        { text: "Boba tea", emoji: "🧋", image: "img/Q6/boba.jpg", bugs: ["kpneu"], note: "sticky, mucoid" },
+        { text: "Glass of milk", emoji: "🥛", image: "img/Q6/milk.jpg", bugs: ["ecoli"], note: "lac operon" },
+        { text: "Kombucha", emoji: "🫙", image: "img/Q6/kombucha.jpg", bugs: ["enterobacter"], note: "fermentation, plants" },
+        { text: "Black coffee", emoji: "☕", image: "img/Q6/coffee.jpg", bugs: ["abaum"], note: "no frills, dry" },
+        { text: "Energy drink", emoji: "⚡", image: "img/Q6/redbull.jpg", bugs: ["enterobacter"], note: "restless, motile" },
+        { text: "Latte", emoji: "🤎", image: "img/Q6/latte.jpg", bugs: ["ecoli"], note: "lac operon" }
+      ]
+    },
+    {
+      prompt: "Pick your weapon for a cartoon-style showdown:", layout: "list",
+      options: [
+        { text: "A milk carton that never runs out", bugs: ["ecoli"], note: "lac operon" },
+        { text: "A tiny gold sword that leaves glitter bruises", bugs: ["saureus"], note: "gold" },
+        { text: "A giant ladle that launches hot chowder", bugs: ["kpneu", "paer"], note: "thick/sticky = capsule & biofilm" },
+        { text: "A root vegetable that doubles as a grappling hook", bugs: ["enterobacter"], note: "plant-y and motile" },
+        { text: "A can of baked beans", bugs: ["efaec"], note: "pure vibes" },
+        { text: "A microscopic drill that breaks walls (and hearts)", bugs: ["saureus"], note: "alpha-toxin pores" },
+        { text: "A nerf gun that shoots sand", bugs: ["abaum"], note: "alt: A banana boomerang that never rots" }
+      ]
+    },
+    {
+      prompt: "You're staying at a friend's house. Which best describes you?", layout: "list",
+      options: [
+        { text: "I came for the weekend. It's been three months.", bugs: ["abaum"], note: "persistent" },
+        { text: "You won't even know I'm here", bugs: ["ecoli"], note: "alt: I'm the perfect guest, as long as I get my own room." },
+        { text: "You invited me. I brought six friends.", bugs: ["kpneu"], note: "social HGT" },
+        { text: "I WILL start redecorating", bugs: ["saureus"], note: "alt: 'I'm sweet to your face, but will roast your apartment in the group chat later.'" },
+        { text: "I'm already in your hot tub before you've given the tour.", bugs: ["paer"], note: "OG hot tub pathogen" },
+        { text: "I show up unannounced and leave without saying goodbye.", bugs: ["enterobacter"], note: "" },
+        { text: "I bring my own snacks, toiletries, and a backup air mattress.", bugs: ["efaec"], note: "prepper" }
+      ]
+    },
+    {
+      prompt: "How do you handle criticism (and antibiotics)?", layout: "list",
+      options: [
+        { text: "I change my appearance until they don't recognize me.", bugs: ["enterobacter", "saureus"], note: "MRSA altered target (PBP2a)" },
+        { text: "I borrow a comeback from a friend.", bugs: ["kpneu", "ecoli"], note: "HGT" },
+        { text: "Honestly? I've heard it all. People have been analyzing me for 100+ years.", bugs: ["ecoli"], note: "" },
+        { text: "I ignore it and keep doing my thing.", bugs: ["abaum"], note: "" },
+        { text: "I build walls and hide behind them.", bugs: ["kpneu", "paer"], note: "capsule; impermeable membrane + biofilm" },
+        { text: "I adapt so fast, it's actually my flex.", bugs: ["enterobacter"], note: "maybe too similar to the first option?" },
+        { text: "I wait until the coast is clear and then bounce back even better.", bugs: ["efaec"], note: "" },
+        { text: "I thrive in the chaos. Bring it on.", bugs: ["abaum"], note: "" },
+        { text: "I cry a little, mutate, and move on.", bugs: ["paer"], note: "hypermutators in CF" }
+      ]
+    },
+    {
+      prompt: "The apocalypse hits. What's your plan?", layout: "list",
+      options: [
+        { text: "Team up right away. Strength in numbers.", bugs: ["kpneu", "ecoli"], note: "" },
+        { text: "Livestream the whole thing. Someone has to document this.", bugs: ["ecoli"], note: "" },
+        { text: "Continue on like normal.", bugs: ["abaum"], note: "" },
+        { text: "Use this opportunity to do some crazy stuff.", bugs: ["kpneu", "efaec"], note: "" },
+        { text: "Stockpile weapons ASAP.", bugs: ["paer"], note: "" },
+        { text: "Honestly? Probably just die.", bugs: ["saureus"], note: "" },
+        { text: "I was born ready for this and already have a secret bunker.", bugs: ["enterobacter", "efaec"], note: "E. faecium's blurb mentions the bunker — swap?" }
+      ]
+    }
+  ]
+};
+/* ===================== END OF EDITABLE CONTENT ===================== */
+</script>
+
+<style>
+  :root{
+    --bg:#F6F1E7; --card:#FFFDF8; --ink:#1F2328; --muted:#5E6470;
+    --line:#E6DDCB; --accent:#169C97; --accent-ink:#fff;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    color:var(--ink); background:var(--bg);
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(22,156,151,.07) 0 60px, transparent 61px),
+      radial-gradient(circle at 88% 12%, rgba(217,165,32,.09) 0 42px, transparent 43px),
+      radial-gradient(circle at 80% 85%, rgba(224,103,154,.08) 0 70px, transparent 71px),
+      radial-gradient(circle at 8% 90%, rgba(62,155,79,.07) 0 36px, transparent 37px);
+    min-height:100vh; padding:24px 16px 40px;
+    line-height:1.5;
+  }
+  .wrap{max-width:720px;margin:0 auto}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:24px;
+    padding:28px 24px; box-shadow:0 10px 30px -18px rgba(60,40,10,.35);
+  }
+  h1,h2,h3,.display{font-family:'Indie Flower',Inter,system-ui,sans-serif;letter-spacing:.2px}
+  h1{font-size:clamp(28px,6vw,42px);line-height:1.1;margin:8px 0 10px}
+  h2{font-size:clamp(20px,4.4vw,26px);line-height:1.25;margin:0 0 18px}
+  p{margin:0 0 12px}
+  .muted{color:var(--muted)}
+  .center{text-align:center}
+
+  /* intro dish */
+  .dish{
+    width:140px;height:140px;margin:4px auto 25px;border-radius:50%;
+    background:radial-gradient(circle at 50% 50%, #FBF5E6 0 58%, #EFE4CC 59% 64%, #FBF5E6 65%);
+    border:3px solid #D8CBAE; position:relative; overflow:hidden;
+  }
+  .dish span{position:absolute;border-radius:50%;opacity:.9}
+
+  .btn{
+    font:600 16px/1 Inter,system-ui,sans-serif; border:0; cursor:pointer;
+    padding:14px 22px; border-radius:999px; background:var(--accent); color:var(--accent-ink);
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .btn:hover{filter:brightness(1.07)} .btn:active{transform:scale(.97)}
+  .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+  .btn:focus-visible,.opt:focus-visible{outline:3px solid #F2B84B;outline-offset:2px}
+
+  /* progress */
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .back{background:none;border:0;cursor:pointer;color:var(--muted);font:500 14px Inter,sans-serif;padding:6px 4px}
+  .back[disabled]{visibility:hidden}
+  .progress{flex:1;height:8px;background:#EEE5D3;border-radius:99px;overflow:hidden}
+  .progress i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s ease}
+  .count{font:600 13px Inter,sans-serif;color:var(--muted);min-width:44px;text-align:right}
+
+  /* options */
+  .list{display:grid;gap:10px}
+  .grid{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
+  @media (max-width:700px){ .grid{grid-template-columns:repeat(2,1fr)} }
+  .opt{
+    width:100%; text-align:left; cursor:pointer; background:#fff;
+    border:1.5px solid var(--line); border-radius:var(--radius);
+    padding:14px 16px; font:500 16px/1.35 Inter,system-ui,sans-serif; color:var(--ink);
+    transition:border-color .12s, transform .12s, background .12s;
+  }
+  .opt:hover{border-color:var(--accent);background:#F4FBFA}
+  .opt:active{transform:scale(.985)}
+  .opt.picked{border-color:var(--accent);background:#E5F5F3}
+  .grid .opt{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;gap:8px;padding:14px 10px;font-size:14.5px}
+  .grid .art{width:100%;height:clamp(84px,18vw,120px);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:44px;background:#F7F1E4;overflow:hidden}
+  .grid .art img{width:100%;height:100%;object-fit:cover}
+  .grid .art.swatch{border:1px solid rgba(0,0,0,.06)}
+
+  /* result */
+  .result-head{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .colony{width:120px;height:120px;border-radius:50%;margin:26px 0 24px;position:relative;
+    box-shadow:inset -10px -12px 0 rgba(0,0,0,.12), inset 8px 8px 0 rgba(255,255,255,.18), 0 0 0 10px #F3EAD7, 0 0 0 13px #DCCDAE}
+  .kicker{font:600 13px Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .bugname{font-style:italic;font-size:clamp(26px,6vw,38px);margin:4px 0 2px}
+  .arch{font:600 18px 'Indie Flower',sans-serif;margin-bottom:12px}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:18px}
+  .tag{font:500 13px Inter,sans-serif;padding:5px 10px;border-radius:99px;background:#F1E9D8}
+  .toxic{border-radius:16px;padding:14px 16px;margin:16px 0 22px;background:#FFF1F1;border:1px solid #F4CACA}
+  .toxic b{display:block;font:600 13px Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#B23B3B;margin-bottom:4px}
+  .bars{display:grid;gap:8px;margin:8px 0 22px}
+  .bar{display:grid;grid-template-columns:120px 1fr 42px;align-items:center;gap:10px;font-size:14px}
+  .bar .lab{font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar .track{height:10px;border-radius:99px;background:#EFE7D6;overflow:hidden}
+  .bar .fill{display:block;height:100%;border-radius:99px;transition:width .6s ease}
+  .bar .pct{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  details{margin-top:24px;border-top:1px solid var(--line);padding-top:14px}
+  summary{cursor:pointer;font:600 15px Inter,sans-serif}
+  .crew{display:grid;gap:10px;margin-top:12px}
+  .crew div{display:flex;gap:10px;align-items:flex-start;font-size:14.5px}
+  .dot{width:16px;height:16px;border-radius:50%;flex:none;margin-top:3px}
+  footer{text-align:center;font-size:13px;color:var(--muted);margin-top:18px}
+  footer a{color:inherit}
+  .fade{animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  .plate{width:200px;height:200px;margin:14px 0 16px}
+  .thumb{width:44px;height:44px;flex:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <main id="app" class="card" aria-live="polite"></main>
+  <footer id="credit"></footer>
+</div>
+
+<script>
+(function(){
+  const app = document.getElementById('app');
+  const BUGS = QUIZ.BUGS, Qs = QUIZ.QUESTIONS, KEYS = Object.keys(BUGS);
+  let answers = []; // index of chosen option per question
+
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // credit footer
+  const credit = document.getElementById('credit');
+  if (QUIZ.credit) credit.innerHTML = QUIZ.creditLink
+    ? `<a href="${esc(QUIZ.creditLink)}" target="_blank" rel="noopener">${esc(QUIZ.credit)}</a>` : esc(QUIZ.credit);
+
+  function intro(){
+    const dots = KEYS.map((k,i)=>{
+      const a = (i/KEYS.length)*Math.PI*2, r = 34 + (i%2)*10, s = 18 + (i%3)*6;
+      return `<span style="width:${s}px;height:${s}px;background:${BUGS[k].color};left:${70+Math.cos(a)*r-s/2}px;top:${70+Math.sin(a)*r-s/2}px"></span>`;
+    }).join('');
+    app.innerHTML = `<div class="center fade">
+      <div class="dish" aria-hidden="true">${dots}</div>
+      <h1>${esc(QUIZ.title)}</h1>
+      <p class="muted" style="font-size:17px;color:#E0679A;font-weight:600">${esc(QUIZ.subtitle)}</p>
+      <p class="muted" style="max-width:700px;margin:0 auto 22px">${esc(QUIZ.blurb)}</p>
+      <button class="btn" id="start">Start the quiz</button>
+    </div>`;
+    document.getElementById('start').onclick = () => { answers = []; question(0); };
+    notifyHeight();
+  }
+
+  function question(i){
+    const q = Qs[i], grid = q.layout === 'grid';
+    const opts = q.options.map((o,j)=>{
+      let art = '';
+      if (grid){
+        if (o.image) art = `<div class="art"><img src="${esc(o.image)}" alt=""></div>`;
+        else if (o.swatch) art = `<div class="art swatch" style="background:${esc(o.swatch)}"></div>`;
+        else art = `<div class="art" aria-hidden="true">${esc(o.emoji||'🦠')}</div>`;
+      }
+      const picked = answers[i] === j ? ' picked' : '';
+      return `<button class="opt${picked}" data-j="${j}">${art}<span>${esc(o.text)}</span></button>`;
+    }).join('');
+    app.innerHTML = `<div class="fade">
+      <div class="topbar">
+        <button class="back" ${i===0?'disabled':''} aria-label="Previous question">← Back</button>
+        <div class="progress" aria-hidden="true"><i style="width:${(i/Qs.length)*100}%"></i></div>
+        <div class="count">${i+1} / ${Qs.length}</div>
+      </div>
+      <h2>${esc(q.prompt)}</h2>
+      <div class="${grid?'grid':'list'}">${opts}</div>
+    </div>`;
+    app.querySelector('.back').onclick = () => question(i-1);
+    app.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      answers[i] = +b.dataset.j;
+      b.classList.add('picked');
+      setTimeout(() => (i+1 < Qs.length ? question(i+1) : finish()), 160);
+    });
+    app.scrollIntoView({block:'start',behavior:'smooth'});
+    notifyHeight();
+  }
+
+  function score(){
+    const pts = Object.fromEntries(KEYS.map(k=>[k,0]));
+    answers.forEach((j,i)=> Qs[i].options[j].bugs.forEach(b => { if (b in pts) pts[b]++; }));
+    const max = Math.max(...KEYS.map(k=>pts[k]));
+    const tied = KEYS.filter(k=>pts[k]===max);
+    return {pts, tied};
+  }
+
+  // after the last question: straight to the result, or a tie-break if needed
+  function finish(){
+    const {tied} = score();
+    if (tied.length > 1) tiebreak(tied); else result(tied[0]);
+  }
+
+  function tiebreak(tied){
+    const order = [...tied].sort(()=>Math.random()-0.5); // shuffle
+    const opts = order.map(k=>{
+      const line = BUGS[k].tiebreak || BUGS[k].vibes.join(', ');
+      return `<button class="opt" data-k="${k}"><span>${esc(line)}</span></button>`;
+    }).join('');
+    app.innerHTML = `<div class="fade">
+      <div class="topbar">
+        <button class="back" aria-label="Previous question">← Back</button>
+        <div class="progress" aria-hidden="true"><i style="width:100%"></i></div>
+        <div class="count">Tie!</div>
+      </div>
+      <h2>${esc(QUIZ.tiebreakPrompt || "It's a tie! Which one sounds the most like you?")}</h2>
+      <div class="list">${opts}</div>
+    </div>`;
+    app.querySelector('.back').onclick = () => question(Qs.length-1);
+    app.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      b.classList.add('picked');
+      setTimeout(() => result(b.dataset.k), 160);
+    });
+    app.scrollIntoView({block:'start',behavior:'smooth'});
+    notifyHeight();
+  }
+
+  function result(winner){
+    const {pts} = score(), B = BUGS[winner];
+    const total = KEYS.reduce((s,k)=>s+pts[k],0) || 1;
+    const ranked = [...KEYS].sort((a,b)=>pts[b]-pts[a] || (a===winner?-1:b===winner?1:0)); // your bug first on ties
+    const bars = ranked.map(k=>{
+      const p = Math.round(pts[k]/total*100);
+      return `<div class="bar"><span class="lab">${esc(BUGS[k].short)}</span>
+        <span class="track"><span class="fill" style="width:0;background:${BUGS[k].color}" data-w="${p}"></span></span>
+        <span class="pct">${p}%</span></div>`;
+    }).join('');
+    const crew = KEYS.filter(k=>k!==winner).map(k=>
+      `<div>${BUGS[k].art ? `<img class="thumb" src="${esc(BUGS[k].art)}" alt="">` : `<span class="dot" style="background:${BUGS[k].color}"></span>`}
+        <span><i>${esc(BUGS[k].short)}</i> — <b>${esc(BUGS[k].archetype)}</b>. ${esc(BUGS[k].toxic)}</span></div>`).join('');
+
+    app.innerHTML = `<div class="fade">
+      <div class="result-head">
+        <div class="kicker">You are…</div>
+        ${B.art ? `<img class="plate" src="${esc(B.art)}" alt="">` : `<div class="colony" style="background:${B.color}" aria-hidden="true"></div>`}
+        <h1 class="bugname">${esc(B.name)}</h1>
+        <div class="arch">${esc(B.archetype)}</div>
+        <div class="tags">${B.vibes.map(v=>`<span class="tag">${esc(v)}</span>`).join('')}</div>
+      </div>
+      <p>${esc(B.personality)}</p>
+      <div class="toxic"><b>Toxic trait</b>${esc(B.toxic)}</div>
+      <h3 style="margin:0 0 8px">Your full culture</h3>
+      <div class="bars">${bars}</div>
+      <div class="actions">
+        <button class="btn" id="share">Share my result</button>
+        <button class="btn ghost" id="again">Retake quiz</button>
+      </div>
+      <details><summary>Meet the rest of the ESKAPEE crew</summary><div class="crew">${crew}</div></details>
+    </div>`;
+    requestAnimationFrame(()=>app.querySelectorAll('.fill').forEach(f=>f.style.width=f.dataset.w+'%'));
+    document.getElementById('again').onclick = intro;
+    document.getElementById('share').onclick = async (e) => {
+      const text = `I got ${B.short} — ${B.archetype} — on the "${QUIZ.title}" quiz! 🦠`;
+      const url = (window.top === window ? location.href : document.referrer) || location.href;
+      try {
+        if (navigator.share) await navigator.share({title: QUIZ.title, text, url});
+        else { await navigator.clipboard.writeText(text + ' ' + url); e.target.textContent = 'Copied to clipboard!'; }
+      } catch(_) {}
+    };
+    app.scrollIntoView({block:'start',behavior:'smooth'});
+    notifyHeight();
+  }
+
+  // lets an embedding page auto-size the iframe (optional; see embed snippet)
+  function notifyHeight(){
+    setTimeout(()=>{ try{ parent.postMessage({superbugQuizHeight: document.documentElement.scrollHeight}, '*'); }catch(_){} }, 50);
+  }
+  window.addEventListener('resize', notifyHeight);
+
+  intro();
+})();
+</script>
+</body>
+</html>
