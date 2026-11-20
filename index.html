@@ -488,9 +488,12 @@ const QUIZ = {
 
   // lets an embedding page auto-size the iframe (optional; see embed snippet)
   function notifyHeight(){
-    setTimeout(()=>{ try{ parent.postMessage({superbugQuizHeight: document.documentElement.scrollHeight}, '*'); }catch(_){} }, 50);
+    // measure the quiz content itself (not the frame), so resizing the frame can't feed back
+    const wrap = document.querySelector('.wrap');
+    const h = Math.ceil(wrap.getBoundingClientRect().bottom + window.scrollY + 40);
+    try{ parent.postMessage({superbugQuizHeight: h}, '*'); }catch(_){}
   }
-  window.addEventListener('resize', notifyHeight);
+  new ResizeObserver(notifyHeight).observe(document.querySelector('.wrap'));
 
   intro();
 })();
