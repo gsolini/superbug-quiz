@@ -490,7 +490,7 @@ const QUIZ = {
   function notifyHeight(){
     // measure the quiz content itself (not the frame), so resizing the frame can't feed back
     const wrap = document.querySelector('.wrap');
-    const h = Math.ceil(wrap.getBoundingClientRect().bottom + window.scrollY + 40);
+    const h = Math.ceil(wrap.getBoundingClientRect().bottom + window.scrollY + 12);
     try{ parent.postMessage({superbugQuizHeight: h}, '*'); }catch(_){}
   }
   new ResizeObserver(notifyHeight).observe(document.querySelector('.wrap'));
